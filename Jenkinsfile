@@ -1,28 +1,33 @@
-pipeline {
-    agent {
-        label 'mvndoc'
+pipeline { 
+    environment { 
+        registry = "prabhucdt/prabhucdt" 
+        registryCredential = 'prabhu-dockerhub-id' 
+        dockerImage = '' 
     }
-    
-    stages {
-        stage('maven clean') {
+    agent {
+        label 'maven'
+    }
+    stages { 
+        stage('Maven Build') {
             steps {
                 sh 'mvn clean install'
             }
-        }
-        
-        stage('docker build') {
-            steps {
-                sh 'docker build -t prabhucdt/sample-app .'
-            }
-        }
-        
-        stage('docker push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'prabhu-dockerhub-id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-                    sh 'docker push prabhucdt/sample-app'
+        }        
+        stage('Build docker image') { 
+            steps { 
+                script { 
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
                 }
+            } 
+        }
+        stage('Push docker image') { 
+            steps { 
+                script { 
+                    docker.withRegistry( '', registryCredential ) { 
+                        dockerImage.push() 
+                    }
+                } 
             }
-        }    
+        } 
     }
 }
