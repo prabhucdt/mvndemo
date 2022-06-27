@@ -1,7 +1,7 @@
 pipeline {
   agent {
     kubernetes {
-      label 'kubernetes'
+      label 'devops'
       defaultContainer 'jnlp'
       yaml """
 apiVersion: v1
@@ -11,7 +11,7 @@ labels:
   component: ci
 spec:
   # Use service account that can deploy to all namespaces
-  serviceAccountName: cd-jenkins
+  serviceAccountName: default
   containers:
   - name: maven
     image: maven:latest
@@ -35,7 +35,7 @@ spec:
         path: /var/run/docker.sock
     - name: m2
       persistentVolumeClaim:
-        claimName: m2
+        claimName: jenkins
 """
 }
    }
@@ -61,9 +61,12 @@ spec:
     stage('Docker image push') {
       steps {
         container('docker') {
-          sh """
-             docker push prabhucdt/sample-app:$BUILD_NUMBER
-          """
+              withCredentials([usernamePassword(credentialsId: 'prabhu-dockerhub-id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+              sh """
+                docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}
+                docker push prabhucdt/sample-app:$BUILD_NUMBER
+              """
+          }          
         }
       }
     }    
