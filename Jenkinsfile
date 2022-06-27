@@ -12,7 +12,7 @@ pipeline {
         
         stage('docker build') {
             steps {
-                sh 'docker build -t Northstar:latest .'
+                sh 'docker build -t prabhucdt/sample-app .'
             }
         }
         
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'prabhu-dockerhub-id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-                    sh 'docker push sample-app:latest'
+                    sh 'docker push prabhucdt/sample-app'
                 }
             }
         }    
