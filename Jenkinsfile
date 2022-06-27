@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'maven'
+        label 'mvndoc'
     }
     
     stages {
@@ -18,7 +18,7 @@ pipeline {
         
         stage('docker push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'd06b6e42-4782-4848-8322-49b920ce9754', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                withCredentials([usernamePassword(credentialsId: 'prabhu-dockerhub-id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
                     sh 'docker push Northstar:latest'
                 }
